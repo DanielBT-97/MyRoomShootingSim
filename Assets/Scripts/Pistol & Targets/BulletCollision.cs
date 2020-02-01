@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Simple Script only used for the collision of the bullet.
+/// </summary>
 public class BulletCollision : MonoBehaviour
 {
     #region Type Definitions

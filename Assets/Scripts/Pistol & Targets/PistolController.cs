@@ -10,14 +10,12 @@ public class PistolController : MonoBehaviour
     #region Type Definitions
     [Serializable]
     public struct BulletConfig {
-        public GameObject bulletObject;
         public float bulletDamage;
         public float bulletSpeed;
         public float bulletSize;
         public Vector3 fireDirection;
 
-        public BulletConfig(GameObject p_bulletObj, Vector3 bulletDir, float p_bulletDmg, float p_bulletSpeed, float p_bulletSize) {
-            bulletObject = p_bulletObj;
+        public BulletConfig(Vector3 bulletDir, float p_bulletDmg, float p_bulletSpeed, float p_bulletSize) {
             fireDirection = bulletDir;
             bulletDamage = p_bulletDmg;
             bulletSpeed = p_bulletSpeed;
@@ -48,7 +46,6 @@ public class PistolController : MonoBehaviour
     [SerializeField] private float _bulletSpeed = 5f;   //Speed of the bullets fired by this gun.
 
     [Header("Bullet Settup")]
-    [SerializeField] private GameObject _bulletPrefab = null;
     [SerializeField] private BulletSpawnManager _bulletSpawnManager = null;
 	#endregion
 
@@ -68,22 +65,27 @@ public class PistolController : MonoBehaviour
 	#endregion
 
     #region Unity Lifecycle
+    /// <summary>
+    /// On Awake I check for the fire rate to be not be negative since that would break the wait in the coroutine.
+    /// I set the values for the BulletConfig based on weapon settings. This implies that it cannot be modified in runtime so far (Not modified anywhere else, only used).
+    /// </summary>
     private void Awake() {
         if(_fireRate <= 0) {
             Debug.LogException(new Exception("Fire rate is <= 0, it will be set to 0.1"), this.gameObject);
             _fireRate = 0.1f;
         }
 
-        if(_bulletPrefab == null) {
-            Debug.LogException(new Exception("Bullet prefab is not set. Will result in errors when firing."), this.gameObject);
-        }
-
         //Bullet Setup
-        _bullet = new BulletConfig(_bulletPrefab, _spawnPoint.forward, _weaponDamage, _bulletSpeed, CalculateBulletSize(_weaponDamage));
+        _bullet = new BulletConfig(_spawnPoint.forward, _weaponDamage, _bulletSpeed, CalculateBulletSize(_weaponDamage));
     }
 
-    void Update()
-    {
+    /// <summary>
+    /// Rotate the gun towards where the crosshair is pointing.
+    /// Check for LeftClick press in order to start the shooting action.
+    ///     CanShoot is used to limit when the player can shoot. In case I want to use some reload/cooldown mechanic later.
+    /// Check for LeftClick release in order to stop the shooting action.
+    /// </summary>
+    void Update() {
         //Debug.DrawRay(_spawnPoint.position, _spawnPoint.forward, Color.green, 1f);
         RotateGunTowardsCrosshair();
 
@@ -105,6 +107,10 @@ public class PistolController : MonoBehaviour
 	#endregion
 
     #region Other methods
+    /// <summary>
+    /// Creates a raycast from the camera towards the crosshair in order to know where the bullet should hit.
+    /// Uses the hit point world position and the LookAt function to rotate the gun so that the bullet spawn's forward vector is pointing towards wwhere it needs to.
+    /// </summary>
     private void RotateGunTowardsCrosshair() {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(_crosshairTrans.position);
@@ -114,23 +120,31 @@ public class PistolController : MonoBehaviour
             Vector3 hitPos = hit.point;
             _gunTrans.LookAt(hitPos + _pointGunOffset);
         }
-
-        //_gunTrans.LookAt();
     }
 
+    /// <summary>
+    /// Method used when the player wants to shoot a bullet. Manages whether it needs to just spawn one bullet or to create a coroutine in order to shoot multiple in a row.
+    /// TODO: So far Bullets per fire is not used. Implement Shotgun.
+    /// TODO: So far its only Semi or Auto, there is no burst fire. In order to shoot burst of 3 you need to hold mouse0. Implement option to burst with one click.
+    /// </summary>
     private void Shoot() {
         _bulletsFired = 0;
         if(_maxBulletsPerFire == 1) { //Once per trigger pull.
             SpawnBullet();
             _canShoot = false;
         } else {    //Start shooting until burst done or trigger released.
-            _fireCoroutine = FireCorroutine();
+            _fireCoroutine = FireCoroutine();
             _shooting = true;
             StartCoroutine(_fireCoroutine);
         }
         
     }
 
+    /// <summary>
+    /// Method called in order to spawn a bullet.
+    /// Spawns the bullet using the BulletManager pool and rotates and positions it in order to face the corect direction.
+    /// Does all the settings needed for the bullet to work using the BulletController's interfaces.
+    /// </summary>
     private void SpawnBullet() {
         Debug.Log("Bullet spawned.");
         BulletSpawnManager.BulletTemplate bulletTemp = _bulletSpawnManager.SpawnBullet(out bool couldFire);
@@ -146,7 +160,11 @@ public class PistolController : MonoBehaviour
         }
     }
 
-    private IEnumerator FireCorroutine() {
+    /// <summary>
+    /// This coroutine is used for Automatic Fire.
+    /// Spawns a bullet every _fireRate seconds.
+    /// </summary>
+    private IEnumerator FireCoroutine() {
         while(_shooting && _bulletsFired < _maxBulletsPerFire) {
             SpawnBullet();
             yield return new WaitForSeconds(_fireRate);
@@ -156,6 +174,11 @@ public class PistolController : MonoBehaviour
         yield return null;
     }
 
+    /// <summary>
+    /// Function used to scale the bullet up depending on the damage it does.
+    /// </summary>
+    /// <param name="bulletDamage"></param>
+    /// <returns></returns>
     private float CalculateBulletSize(float bulletDamage) {
         float tempSize = 0f;
         tempSize = bulletDamage * 0.1f;
