@@ -14,12 +14,15 @@ public class BulletController : MonoBehaviour
 	#endregion
 
     #region Serialized Fields
-    [SerializeField] private ParticleSystem _hitEffect = null;
+    [SerializeField] private BulletSpawnManager _spawnManager = null;
+    public GameObject _bulletGameObject = null;
+    public ParticleSystem _hitEffect = null;
     [SerializeField] private PistolController.BulletConfig _bulletConfig;
     [SerializeField] private Rigidbody _rigid = null;
 	#endregion
 
     #region Standard Attributes
+    private BulletSpawnManager.BulletTemplate _bulletManagerReference;
 	#endregion
 
     #region Consultors and Modifiers
@@ -27,32 +30,44 @@ public class BulletController : MonoBehaviour
 
     #region API Methods
     public void SetBulletSettings(PistolController.BulletConfig config) {
-        Debug.Log("BULLET SETTINGS");
         _bulletConfig = config;
     }
 
+    public void SetBulletTemplate(BulletSpawnManager.BulletTemplate bulletTemp) {
+        _bulletManagerReference = bulletTemp;
+    }
+
     public void Launch() {
-        Debug.Log("BULLET LAUNCH");
-        _rigid.velocity = this.transform.forward * _bulletConfig.bulletSpeed;
+        _bulletGameObject.SetActive(true);
+        _rigid.velocity = _bulletGameObject.transform.forward * _bulletConfig.bulletSpeed;
+    }
+
+    public void BulletCollided(Collision other)
+    {
+        Debug.Log("Collision: " + other);
+        _rigid.velocity = Vector3.zero;
+        _bulletGameObject.SetActive(false);
+        
+        _hitEffect.gameObject.transform.position = _bulletGameObject.transform.position;
+        _hitEffect.gameObject.SetActive(true);
+        _hitEffect.Play();
+        StartCoroutine(HitEffectDelayDisable());
     }
 	#endregion
 
     #region Unity Lifecycle
-    private void Start() {
-        Debug.Log("BULLET START");
-        Launch();
-    }
 	#endregion
 
     #region Unity Callback
-    void OnCollisionEnter(Collision other)
-    {
-        Debug.Log(other);
-        Destroy(this.gameObject);
-    }
+    
 	#endregion
 
     #region Other methods
+    private IEnumerator HitEffectDelayDisable() {
+        yield return new WaitForSeconds(_hitEffect.main.duration);
+        _hitEffect.gameObject.SetActive(false);
+        _spawnManager.DespawnBullet(_bulletManagerReference);
+    }
 	#endregion
 
 }
