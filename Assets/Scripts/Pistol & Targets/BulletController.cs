@@ -72,6 +72,7 @@ public class BulletController : MonoBehaviour
         _bulletGameObject.SetActive(false);
         
         _hitEffect.gameObject.transform.position = _bulletGameObject.transform.position;
+        _hitEffect.gameObject.transform.forward = other.GetContact(0).normal;
         _hitEffect.gameObject.SetActive(true);
         _hitEffect.Play();
         StartCoroutine(HitEffectDelayDisable());

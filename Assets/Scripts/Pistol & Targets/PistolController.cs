@@ -33,24 +33,27 @@ public class PistolController : MonoBehaviour
 
     #region Serialized Fields
     [Header("Weapon Settup")]
-    [SerializeField] private Transform _gunTrans = null;
-    [SerializeField] private RectTransform _crosshairTrans = null;
-    [SerializeField] private Vector3 _pointGunOffset = new Vector3(0, -0.05f, 0);
-    [SerializeField] private Transform _spawnPoint = null;
+    [SerializeField] private Transform _gunTrans = null;            //Transform of the main object. (Allows for the script to be somwhere else in the GameObject)
+    [SerializeField] private RectTransform _crosshairTrans = null;  //Transform of the crosshair. Used for the Camera Raycast to point the gun.
+    [SerializeField] private Vector3 _pointGunOffset = new Vector3(0, -0.05f, 0);   //Offset used for the position the gun is pointing at to line up with the crosshair (There was some Y-axis offset to correct)
+    [SerializeField] private Transform _spawnPoint = null;          //BulletSpawnPoint
+    [SerializeField] private Transform _targetPositionTrans = null; //Target position of the gun in 3D Space.
+    [SerializeField] private float _transitionPositionSpeed = 20f;   //Speed at which the gun lerps towards that target position.
 
     [Header("Weapon Settings")]
-    [SerializeField] private float _fireRate = -1f;  //Wait between each call to Shoot (Trigger pulled) -- (-1) => Once per trigger pull only.
+    [SerializeField] private bool _burstFire = false; //Whether you need to hold the fire button to fire the maximum bullets per fire.
+    [SerializeField] private float _fireRate = 1f;  //Wait between each call to Shoot (Trigger pulled) -- (-1) => Once per trigger pull only.
     [SerializeField] private int _maxBulletsPerFire = 1;    //Number of bullets that can be fire before having to release the trigger.
     [SerializeField] private int _bulletsPerFire = 1;   //Number of bullets per fire (shotgun i.g)
     [SerializeField] private float _weaponDamage = 1f; //Damage per bullet.
     [SerializeField] private float _bulletSpeed = 5f;   //Speed of the bullets fired by this gun.
 
     [Header("Bullet Settup")]
-    [SerializeField] private BulletSpawnManager _bulletSpawnManager = null;
+    [SerializeField] private BulletSpawnManager _bulletSpawnManager = null; //Reference to the bullet spawn manager (Object Pooling)
 	#endregion
 
     #region Standard Attributes
-    private BulletConfig _bullet = default;
+    private BulletConfig _bullet = default; //Configuration for damage, speed, size and
     private bool _canShoot = true;
     private bool _shooting = false;
     private int _bulletsFired = 0;
@@ -62,6 +65,19 @@ public class PistolController : MonoBehaviour
 	#endregion
 
     #region API Methods
+    /// <summary>
+    /// This is a method that can be called to reset the state of the weapon to its default.
+    /// Will stop shooting if it was still using the corroutine and will reset all the variables to starting values.
+    /// </summary>
+    public void FullWeaponReset() {
+        _bulletsFired = 0;
+        _shooting = false;
+        _canShoot = true;
+        if(_fireCoroutine != null) {
+            StopCoroutine(_fireCoroutine);
+            _fireCoroutine = null;
+        }
+    }
 	#endregion
 
     #region Unity Lifecycle
@@ -87,12 +103,13 @@ public class PistolController : MonoBehaviour
     /// </summary>
     void Update() {
         //Debug.DrawRay(_spawnPoint.position, _spawnPoint.forward, Color.green, 1f);
+        LerpGunToPosition();
         RotateGunTowardsCrosshair();
 
         if(Input.GetKeyDown(KeyCode.Mouse0) && _canShoot) {
             Shoot();
         }
-        if(Input.GetKeyUp(KeyCode.Mouse0)) {
+        if(Input.GetKeyUp(KeyCode.Mouse0) && !_burstFire) {
             if(_fireCoroutine != null) {
                 StopCoroutine(_fireCoroutine);
                 _fireCoroutine = null;
@@ -107,6 +124,11 @@ public class PistolController : MonoBehaviour
 	#endregion
 
     #region Other methods
+    private void LerpGunToPosition() {
+        Vector3 targetPos = _targetPositionTrans.position;
+        _gunTrans.position = Vector3.Lerp(_gunTrans.position, targetPos, Time.deltaTime * _transitionPositionSpeed);
+    }
+
     /// <summary>
     /// Creates a raycast from the camera towards the crosshair in order to know where the bullet should hit.
     /// Uses the hit point world position and the LookAt function to rotate the gun so that the bullet spawn's forward vector is pointing towards wwhere it needs to.
@@ -133,8 +155,9 @@ public class PistolController : MonoBehaviour
             SpawnBullet();
             _canShoot = false;
         } else {    //Start shooting until burst done or trigger released.
+            _shooting = true;   //Shooting is happening. (Not used in single fire since it happens in a single frame)
+            _canShoot = false;  //Block any other calls to shoot from Input.
             _fireCoroutine = FireCoroutine();
-            _shooting = true;
             StartCoroutine(_fireCoroutine);
         }
         
@@ -161,20 +184,6 @@ public class PistolController : MonoBehaviour
     }
 
     /// <summary>
-    /// This coroutine is used for Automatic Fire.
-    /// Spawns a bullet every _fireRate seconds.
-    /// </summary>
-    private IEnumerator FireCoroutine() {
-        while(_shooting && _bulletsFired < _maxBulletsPerFire) {
-            SpawnBullet();
-            yield return new WaitForSeconds(_fireRate);
-        }
-
-        _fireCoroutine = null;
-        yield return null;
-    }
-
-    /// <summary>
     /// Function used to scale the bullet up depending on the damage it does.
     /// </summary>
     /// <param name="bulletDamage"></param>
@@ -184,6 +193,25 @@ public class PistolController : MonoBehaviour
         tempSize = bulletDamage * 0.1f;
         tempSize = Mathf.Clamp(tempSize, 0.05f, 1f);
         return tempSize;
+    }
+
+    /// <summary>
+    /// This coroutine is used for Automatic Fire.
+    /// Spawns a bullet every _fireRate seconds.
+    /// </summary>
+    private IEnumerator FireCoroutine() {
+        while(_shooting && _bulletsFired < _maxBulletsPerFire) {
+            SpawnBullet();
+            if(_bulletsFired != _maxBulletsPerFire) yield return new WaitForSeconds(_fireRate); //Last bullet does not apply a trigger delay. TODO: Can be used to add a different delay between burst seperate from the fireRate.
+        }
+        
+        //If the gun is set to burst fire it does not trigger the ButtonUp callback so these bools need to be reset at the end of the coroutine.
+        if(_burstFire) {
+            _shooting = false;
+            _canShoot = true;
+        }
+        _fireCoroutine = null;
+        yield return null;
     }
 	#endregion
 

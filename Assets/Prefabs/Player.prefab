@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2000023489663828080
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8194794129623294975}
+  m_Layer: 0
+  m_Name: GunPositionTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8194794129623294975
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000023489663828080}
+  m_LocalRotation: {x: 0, y: -0.007853894, z: 0, w: 0.9999692}
+  m_LocalPosition: {x: 0.192, y: -0.204, z: 0.431}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_Children: []
+  m_Father: {fileID: 2744438939046344588}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: -0.9, z: 0}
 --- !u!1 &2744438939046344577
 GameObject:
   m_ObjectHideFlags: 0
@@ -30,9 +60,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 7164242266142455907}
+  - {fileID: 8194794129623294975}
   m_Father: {fileID: 2744438939451630827}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &2744438939046344591
 Camera:
@@ -57,7 +87,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -174,6 +204,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
+  - {fileID: 7164242266142455907}
   - {fileID: 2744438939046344588}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -216,7 +247,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    m_TransformParent: {fileID: 2744438939046344588}
+    m_TransformParent: {fileID: 2744438939451630827}
     m_Modifications:
     - target: {fileID: 5826337986836318331, guid: 2f598ee494edc334cb5827a31dd7d6ae,
         type: 3}
@@ -273,6 +304,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5826337986836318331, guid: 2f598ee494edc334cb5827a31dd7d6ae,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.10000001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5826337986836318331, guid: 2f598ee494edc334cb5827a31dd7d6ae,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.10000001
+      objectReference: {fileID: 0}
     - target: {fileID: 7385927988063812200, guid: 2f598ee494edc334cb5827a31dd7d6ae,
         type: 3}
       propertyPath: m_Name
@@ -288,6 +329,11 @@ PrefabInstance:
       propertyPath: _bulletSpawnManager
       value: 
       objectReference: {fileID: 2744438939451630825}
+    - target: {fileID: 7385927988063812201, guid: 2f598ee494edc334cb5827a31dd7d6ae,
+        type: 3}
+      propertyPath: _targetPositionTrans
+      value: 
+      objectReference: {fileID: 8194794129623294975}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f598ee494edc334cb5827a31dd7d6ae, type: 3}
 --- !u!4 &7164242266142455907 stripped
