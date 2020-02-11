@@ -38,7 +38,8 @@ public class PistolController : MonoBehaviour
     [SerializeField] private Vector3 _pointGunOffset = new Vector3(0, -0.05f, 0);   //Offset used for the position the gun is pointing at to line up with the crosshair (There was some Y-axis offset to correct)
     [SerializeField] private Transform _spawnPoint = null;          //BulletSpawnPoint
     [SerializeField] private Transform _targetPositionTrans = null; //Target position of the gun in 3D Space.
-    [SerializeField] private float _transitionPositionSpeed = 20f;   //Speed at which the gun lerps towards that target position.
+    [SerializeField] private float _transitionPositionSpeed = 20f;  //Speed at which the gun lerps towards that target position.
+    [SerializeField] private AudioSource _audioSrcShooting = null;  //Audio Source for the shooting sound effect.
 
     [Header("Weapon Settings")]
     [SerializeField] private bool _burstFire = false; //Whether you need to hold the fire button to fire the maximum bullets per fire.
@@ -177,6 +178,7 @@ public class PistolController : MonoBehaviour
             bulletSpawned.transform.rotation = Quaternion.LookRotation(_spawnPoint.forward, _spawnPoint.up);
             bulletTemp.bulletController.SetBulletSettings(_bullet);
             bulletTemp.bulletController.Launch();
+            _audioSrcShooting.Play();
             ++_bulletsFired;
         } else {
             Debug.Log("COULD NOT FIRE");

@@ -23,6 +23,7 @@ public class BulletController : MonoBehaviour
     public ParticleSystem _hitEffect = null;
     [SerializeField] private PistolController.BulletConfig _bulletConfig;
     [SerializeField] private Rigidbody _rigid = null;
+    [SerializeField] private AudioSource _audioSrc = null;
 	#endregion
 
     #region Standard Attributes
@@ -75,6 +76,7 @@ public class BulletController : MonoBehaviour
         _hitEffect.gameObject.transform.forward = other.GetContact(0).normal;
         _hitEffect.gameObject.SetActive(true);
         _hitEffect.Play();
+        _audioSrc.Play();
         StartCoroutine(HitEffectDelayDisable());
     }
 	#endregion
