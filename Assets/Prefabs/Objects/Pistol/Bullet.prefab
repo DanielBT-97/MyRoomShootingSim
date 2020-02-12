@@ -55,6 +55,9 @@ MonoBehaviour:
     fireDirection: {x: 0, y: 0, z: 0}
   _rigid: {fileID: 6039352550888949690}
   _audioSrc: {fileID: 7440607517963775085}
+  _targetLayer:
+    serializedVersion: 2
+    m_Bits: 2048
 --- !u!82 &7440607517963775085
 AudioSource:
   m_ObjectHideFlags: 0

@@ -24,6 +24,7 @@ public class BulletController : MonoBehaviour
     [SerializeField] private PistolController.BulletConfig _bulletConfig;
     [SerializeField] private Rigidbody _rigid = null;
     [SerializeField] private AudioSource _audioSrc = null;
+    [SerializeField] private LayerMask _targetLayer = 0;
 	#endregion
 
     #region Standard Attributes
@@ -66,9 +67,13 @@ public class BulletController : MonoBehaviour
     /// It stops the bullet's movement, disables the bullet itself and activates the hit effect as well as a delay coroutine to know when the effect has ended.
     /// </summary>
     /// <param name="other">Collision hit by the bullet</param>
-    public void BulletCollided(Collision other)
-    {
-        Debug.Log("Collision: " + other);
+    public void BulletCollided(Collision other) {
+        //Call hit method on the hit target. Only check for component if the layer of the object hit is the Target's layer. (bit mask comparison)
+        if( (((1<<other.gameObject.layer) & _targetLayer) != 0) && other.gameObject.TryGetComponent(out TargetController targetController) ) {
+            targetController.Hit(_bulletConfig.bulletDamage);
+        }
+        
+        //Debug.Log("Collision: " + other);
         _rigid.velocity = Vector3.zero;
         _bulletGameObject.SetActive(false);
         
