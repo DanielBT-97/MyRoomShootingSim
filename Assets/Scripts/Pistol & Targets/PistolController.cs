@@ -170,9 +170,10 @@ public class PistolController : MonoBehaviour
     /// Does all the settings needed for the bullet to work using the BulletController's interfaces.
     /// </summary>
     private void SpawnBullet() {
-        Debug.Log("Bullet spawned.");
+        //Debug.Log("Bullet spawned.");
         BulletSpawnManager.BulletTemplate bulletTemp = _bulletSpawnManager.SpawnBullet(out bool couldFire);
         if(couldFire) {
+            bulletTemp.bulletController.gameObject.SetActive(true);
             GameObject bulletSpawned = bulletTemp.bulletController._bulletGameObject;
             bulletSpawned.transform.position = _spawnPoint.position;
             bulletSpawned.transform.rotation = Quaternion.LookRotation(_spawnPoint.forward, _spawnPoint.up);

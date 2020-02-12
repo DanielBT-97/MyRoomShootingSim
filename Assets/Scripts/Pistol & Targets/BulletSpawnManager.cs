@@ -66,6 +66,7 @@ public class BulletSpawnManager : MonoBehaviour
     /// </summary>
     /// <param name="temp">Bullet's template reference. Used to delete the correspondent item from the available/onUse lists.</param>
     public void DespawnBullet(BulletTemplate temp) {
+        temp.bulletController.gameObject.SetActive(false);
         _onUseBullets.Remove(temp);
         _availaleBullets.Add(temp);
     }

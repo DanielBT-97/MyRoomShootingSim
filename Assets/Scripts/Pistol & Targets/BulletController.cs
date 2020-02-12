@@ -69,8 +69,8 @@ public class BulletController : MonoBehaviour
     /// <param name="other">Collision hit by the bullet</param>
     public void BulletCollided(Collision other) {
         //Call hit method on the hit target. Only check for component if the layer of the object hit is the Target's layer. (bit mask comparison)
-        if( (((1<<other.gameObject.layer) & _targetLayer) != 0) && other.gameObject.TryGetComponent(out TargetController targetController) ) {
-            targetController.Hit(_bulletConfig.bulletDamage);
+        if( (((1<<other.gameObject.layer) & _targetLayer) != 0) && other.gameObject.TryGetComponent(out TargetCollision targetCollisionController) ) {
+            targetCollisionController.Hit(_bulletConfig.bulletDamage);
         }
         
         //Debug.Log("Collision: " + other);

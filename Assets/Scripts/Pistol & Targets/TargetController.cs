@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class is the controller that manages all the target's logic.
+/// </summary>
 public class TargetController : MonoBehaviour
 {
     #region Type Definitions
@@ -14,41 +17,73 @@ public class TargetController : MonoBehaviour
 	#endregion
 
     #region Serialized Fields
+    [SerializeField] private TargetSpawnManager _targetSpawnManager = null;
+
     [SerializeField] private Renderer _targetRenderer = null;
-    [SerializeField] private ParticleSystem _destroyEffect = null;
     [SerializeField] private float _currentHealth = 1f;
     [SerializeField, ColorUsageAttribute(true, true)] private Color[] _targetColorProgression = new Color[3];
+
+    [SerializeField] private ParticleSystem _destroyTargetEffect = null;
 	#endregion
 
     #region Standard Attributes
-    private MaterialPropertyBlock _matPropBlock;
+    private MaterialPropertyBlock _matPropBlock = null;
     private Color _currentColor = Color.black;
+    private TargetSpawnManager.TargetReferences _targetReference = default;
+    private bool _targetIsAlive = false;
 	#endregion
 
     #region Consultors and Modifiers
 	#endregion
 
     #region API Methods
+    /// <summary>
+    /// Target has been hit and needs its health reduced.
+    /// Trigger Hit animation once added.
+    /// </summary>
+    /// <param name="bulletDamage"></param>
     public void Hit(float bulletDamage) {
-        Debug.Log("HIT TARGET");
         _currentHealth -= bulletDamage;
 
         UpdateState();
     }
+
+    public void ResetTarget(int health) {
+        _currentHealth = health;
+    }
+
+    public void SetTargetReference(TargetSpawnManager.TargetReferences targetRef) {
+        _targetReference = targetRef;
+    }
+
+    public void TargetSpawned() {
+        _targetRenderer.gameObject.SetActive(true);
+        _targetIsAlive = true;
+    }
 	#endregion
 
     #region Unity Lifecycle
+    /// <summary>
+    /// Creates materialPropBlock once.
+    /// </summary>
     private void Awake() {
-        _matPropBlock = new MaterialPropertyBlock();
-        Debug.Log("CEIL 0: " + Mathf.CeilToInt(0));
+        Debug.Log("AWAKE");
+        if(_matPropBlock == null) _matPropBlock = new MaterialPropertyBlock();
+        //_targetIsAlive = true;
+        //_targetRenderer.gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Manages the target's color.
+    /// </summary>
     private void Update() {
         //Update target colors based on current health.
-        if(_currentHealth <= 0) {   //If current health is lower than 0 (Should get destroyed) use same color as 1 hit.
-            UpdateTargetColor(_targetColorProgression[0]);
-        } else {    //Else use the color corresponding to the rounded UP int value of current health (In case I decide to use a float dmg value at some point).
-            UpdateTargetColor(_targetColorProgression[Mathf.CeilToInt(_currentHealth - 1)]);    //FloorToInt could be used, would change the behaviour so testing needed.
+        if(_targetIsAlive) {
+            if(_currentHealth <= 0) {   //If current health is lower than 0 (Should get destroyed) use same color as 1 hit.
+                UpdateTargetColor(_targetColorProgression[0]);
+            } else {    //Else use the color corresponding to the rounded UP int value of current health (In case I decide to use a float dmg value at some point).
+                UpdateTargetColor(_targetColorProgression[Mathf.CeilToInt(_currentHealth - 1)]);    //FloorToInt could be used, would change the behaviour so testing needed.
+            }
         }
     }
 	#endregion
@@ -57,9 +92,13 @@ public class TargetController : MonoBehaviour
 	#endregion
 
     #region Other methods
+    /// <summary>
+    /// Function used to know when the target is ready to be destroyed. (Health <= 0)
+    /// </summary>
     private void UpdateState() {
         if(_currentHealth <= 0) {
             //Kill target.
+            ExplodeTarget();
         }
     }
 
@@ -73,6 +112,29 @@ public class TargetController : MonoBehaviour
         _matPropBlock.SetColor("_Color", color);            //Set diffuse color.
         _matPropBlock.SetColor("_Emission", color);         //Set emission color to the same as diffuse.
         _targetRenderer.SetPropertyBlock(_matPropBlock);    //Set property block.
+        _currentColor = color;
+    }
+
+    /// <summary>
+    /// Function that manages the target's destruction.
+    /// Triggers the explosion FX.
+    /// </summary>
+    private void ExplodeTarget() {
+        _targetIsAlive = false;
+        _destroyTargetEffect.gameObject.SetActive(true);
+        _destroyTargetEffect.gameObject.transform.position = _targetRenderer.gameObject.transform.position;
+        _targetRenderer.gameObject.SetActive(false);
+        StartCoroutine(HitEffectDelayDisable());
+    }
+
+    /// <summary>
+    /// Coroutine used to delay the deactivation of the explosion effect object as well as the reenabling of the target to be used again in the object pulling.
+    /// Once the delay is finished, using the particle effect duration, the target itself calls the TargetSpawnManager to notify it that it is ready to be used again.
+    /// </summary>
+    private IEnumerator HitEffectDelayDisable() {
+        yield return new WaitForSeconds(_destroyTargetEffect.main.duration);
+        _destroyTargetEffect.gameObject.SetActive(false);
+        _targetSpawnManager.TargetDestroyed(_targetReference);
     }
 
     #region HealthTesting_ContextMenu
@@ -107,7 +169,6 @@ public class TargetController : MonoBehaviour
         _currentHealth = 3;
     }*/
     #endregion
-
 	#endregion
 
 }
