@@ -256,6 +256,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gunTrans: {fileID: 5826337986836318331}
   _crosshairTrans: {fileID: 0}
+  _gunAimingAllowedLayers:
+    serializedVersion: 2
+    m_Bits: 3895
   _pointGunOffset: {x: 0, y: -0.05, z: 0}
   _spawnPoint: {fileID: 1558803238132220705}
   _targetPositionTrans: {fileID: 0}

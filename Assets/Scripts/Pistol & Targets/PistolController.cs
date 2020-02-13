@@ -35,6 +35,7 @@ public class PistolController : MonoBehaviour
     [Header("Weapon Settup")]
     [SerializeField] private Transform _gunTrans = null;            //Transform of the main object. (Allows for the script to be somwhere else in the GameObject)
     [SerializeField] private RectTransform _crosshairTrans = null;  //Transform of the crosshair. Used for the Camera Raycast to point the gun.
+    [SerializeField] private LayerMask _gunAimingAllowedLayers = 0; //Layers with which the raycast to point the gun can interact. (Avoid spawn targets collider)
     [SerializeField] private Vector3 _pointGunOffset = new Vector3(0, -0.05f, 0);   //Offset used for the position the gun is pointing at to line up with the crosshair (There was some Y-axis offset to correct)
     [SerializeField] private Transform _spawnPoint = null;          //BulletSpawnPoint
     [SerializeField] private Transform _targetPositionTrans = null; //Target position of the gun in 3D Space.
@@ -138,7 +139,7 @@ public class PistolController : MonoBehaviour
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(_crosshairTrans.position);
         Debug.DrawRay(ray.origin, ray.direction, Color.cyan);
-        if(Physics.Raycast(ray, out hit)) {
+        if(Physics.Raycast(ray.origin, ray.direction, out hit, Mathf.Infinity, _gunAimingAllowedLayers)) {
             Transform objectHit = hit.transform;
             Vector3 hitPos = hit.point;
             _gunTrans.LookAt(hitPos + _pointGunOffset);

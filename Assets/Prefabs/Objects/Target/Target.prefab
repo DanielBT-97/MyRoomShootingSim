@@ -153,14 +153,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18a8699cbe50c98418f787354d8ee2af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _destroyTargetEffect: {fileID: 3394393064873833218}
   _targetSpawnManager: {fileID: 0}
+  _movementSpeed: 1
   _targetRenderer: {fileID: 4754780159126514250}
   _currentHealth: 1
   _targetColorProgression:
   - {r: 2.1185474, g: 0, b: 0, a: 0.70980394}
   - {r: 0, g: 0.1552862, b: 2.828427, a: 0.70980394}
   - {r: 0.52131796, g: 0.13310245, b: 2.063088, a: 0.70980394}
-  _destroyTargetEffect: {fileID: 3394393064873833218}
 --- !u!1001 &3917720911994270732
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - DeathArea
   layers:
   - Default
   - TransparentFX
@@ -17,8 +18,8 @@ TagManager:
   - Projectile
   - Player
   - Target
-  - 
-  - 
+  - SpawnAreas
+  - DespawnAreas
   - 
   - 
   - 

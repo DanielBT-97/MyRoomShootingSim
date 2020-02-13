@@ -17,13 +17,15 @@ public class TargetController : MonoBehaviour
 	#endregion
 
     #region Serialized Fields
+    [Header("Target Spawn and Movement Settup")]
+    [SerializeField] private ParticleSystem _destroyTargetEffect = null;
     [SerializeField] private TargetSpawnManager _targetSpawnManager = null;
+    [SerializeField] private float _movementSpeed = 5f;
 
+    [Header("Target Settings")]
     [SerializeField] private Renderer _targetRenderer = null;
     [SerializeField] private float _currentHealth = 1f;
     [SerializeField, ColorUsageAttribute(true, true)] private Color[] _targetColorProgression = new Color[3];
-
-    [SerializeField] private ParticleSystem _destroyTargetEffect = null;
 	#endregion
 
     #region Standard Attributes
@@ -31,6 +33,9 @@ public class TargetController : MonoBehaviour
     private Color _currentColor = Color.black;
     private TargetSpawnManager.TargetReferences _targetReference = default;
     private bool _targetIsAlive = false;
+
+    //Movement
+    private Vector3 _movementDirection = Vector3.zero;
 	#endregion
 
     #region Consultors and Modifiers
@@ -48,8 +53,19 @@ public class TargetController : MonoBehaviour
         UpdateState();
     }
 
+    
+    public void InstaKillTarget() {
+        _currentHealth = 0;
+        _targetIsAlive = false;
+        _movementDirection = Vector3.zero;
+        _targetRenderer.gameObject.SetActive(false);
+        _targetSpawnManager.TargetDestroyed(_targetReference);
+    }
+
     public void ResetTarget(int health) {
         _currentHealth = health;
+        _movementDirection = Vector3.zero;
+        _targetRenderer.transform.localPosition = Vector3.zero;
     }
 
     public void SetTargetReference(TargetSpawnManager.TargetReferences targetRef) {
@@ -59,6 +75,11 @@ public class TargetController : MonoBehaviour
     public void TargetSpawned() {
         _targetRenderer.gameObject.SetActive(true);
         _targetIsAlive = true;
+    }
+
+    public void OrientateAndLaunchTarget(Vector3 direction, Vector3 forwardOrientation) {
+        this.gameObject.transform.right = forwardOrientation;
+        _movementDirection = direction;
     }
 	#endregion
 
@@ -84,6 +105,8 @@ public class TargetController : MonoBehaviour
             } else {    //Else use the color corresponding to the rounded UP int value of current health (In case I decide to use a float dmg value at some point).
                 UpdateTargetColor(_targetColorProgression[Mathf.CeilToInt(_currentHealth - 1)]);    //FloorToInt could be used, would change the behaviour so testing needed.
             }
+
+            _targetRenderer.transform.position += _movementDirection * _movementSpeed * Time.deltaTime;
         }
     }
 	#endregion
@@ -123,6 +146,7 @@ public class TargetController : MonoBehaviour
         _targetIsAlive = false;
         _destroyTargetEffect.gameObject.SetActive(true);
         _destroyTargetEffect.gameObject.transform.position = _targetRenderer.gameObject.transform.position;
+        _movementDirection = Vector3.zero;
         _targetRenderer.gameObject.SetActive(false);
         StartCoroutine(HitEffectDelayDisable());
     }
