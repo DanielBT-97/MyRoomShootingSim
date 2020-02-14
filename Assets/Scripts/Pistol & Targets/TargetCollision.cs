@@ -41,15 +41,9 @@ public class TargetCollision : MonoBehaviour
 
     #region Unity Callback
     private void OnTriggerEnter(Collider other) {
-        Debug.Log("TRIGGER TARGET" + other.gameObject.name);
         if(other.gameObject.tag == "DeathArea") {
             _targetController.InstaKillTarget();
         }
-    }
-
-    /// <summary>
-    void OnCollisionEnter(Collision other) {
-        Debug.Log("COLLIDER TARGET" + other.gameObject.name);
     }
 	#endregion
 

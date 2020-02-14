@@ -21,6 +21,7 @@ public class TargetController : MonoBehaviour
     [SerializeField] private ParticleSystem _destroyTargetEffect = null;
     [SerializeField] private TargetSpawnManager _targetSpawnManager = null;
     [SerializeField] private Animator _targetAnimator = null;
+    [SerializeField] private GameObject[] _pointsObj;
 
     [Header("Target Settings")]
     [SerializeField] private Renderer _targetRenderer = null;
@@ -34,6 +35,7 @@ public class TargetController : MonoBehaviour
     private Color _currentColor = Color.black;
     private TargetSpawnManager.TargetReferences _targetReference = default;
     private bool _targetIsAlive = false;
+    private float _initialHealth = 0f;
 
     //Movement
     private Vector3 _movementDirection = Vector3.zero;
@@ -54,7 +56,10 @@ public class TargetController : MonoBehaviour
         UpdateState();
     }
 
-    
+    /// <summary>
+    /// Method used to instakill the target without any animations or transitions.
+    /// Used for the DeathArea despawn so that the target is immediately usable again.
+    /// </summary>
     public void InstaKillTarget() {
         _currentHealth = 0;
         _targetIsAlive = false;
@@ -63,10 +68,20 @@ public class TargetController : MonoBehaviour
         _targetSpawnManager.TargetDestroyed(_targetReference);
     }
 
+    /// <summary>
+    /// Method used to reset the target back to its initial state with a set target health.
+    /// Used when the target has just spawned.
+    /// </summary>
+    /// <param name="health"></param>
     public void ResetTarget(int health) {
         _currentHealth = health;
+        _initialHealth = health;
         _movementDirection = Vector3.zero;
         _targetRenderer.transform.localPosition = Vector3.zero;
+
+        for (int i = 0; i < _pointsObj.Length; i++) {
+            _pointsObj[i].SetActive(false);
+        }
     }
 
     public void SetTargetReference(TargetSpawnManager.TargetReferences targetRef) {
@@ -104,7 +119,7 @@ public class TargetController : MonoBehaviour
             if(_currentHealth <= 0) {   //If current health is lower than 0 (Should get destroyed) use same color as 1 hit.
                 UpdateTargetColor(_targetColorProgression[0]);
             } else {    //Else use the color corresponding to the rounded UP int value of current health (In case I decide to use a float dmg value at some point).
-                UpdateTargetColor(_targetColorProgression[Mathf.CeilToInt(_currentHealth - 1)]);    //FloorToInt could be used, would change the behaviour so testing needed.
+                UpdateTargetColor(_targetColorProgression[RoundUpHealthToInt(_initialHealth) - 1]);    //FloorToInt could be used, would change the behaviour so testing needed.
             }
 
             _targetRenderer.transform.position += _movementDirection * _movementSpeed * Time.deltaTime;
@@ -151,6 +166,7 @@ public class TargetController : MonoBehaviour
         _destroyTargetEffect.gameObject.transform.position = _targetRenderer.gameObject.transform.position;
         _movementDirection = Vector3.zero;
         _targetRenderer.gameObject.SetActive(false);
+        _pointsObj[RoundUpHealthToInt(_initialHealth) - 1].SetActive(true);
         StartCoroutine(HitEffectDelayDisable());
     }
 
@@ -162,6 +178,10 @@ public class TargetController : MonoBehaviour
         yield return new WaitForSeconds(_destroyTargetEffect.main.duration);
         _destroyTargetEffect.gameObject.SetActive(false);
         _targetSpawnManager.TargetDestroyed(_targetReference);
+    }
+
+    private int RoundUpHealthToInt(float health) {
+        return Mathf.CeilToInt(_initialHealth);
     }
 
     #region HealthTesting_ContextMenu
