@@ -17,15 +17,16 @@ public class TargetController : MonoBehaviour
 	#endregion
 
     #region Serialized Fields
-    [Header("Target Spawn and Movement Settup")]
+    [Header("Target References")]
     [SerializeField] private ParticleSystem _destroyTargetEffect = null;
     [SerializeField] private TargetSpawnManager _targetSpawnManager = null;
-    [SerializeField] private float _movementSpeed = 5f;
+    [SerializeField] private Animator _targetAnimator = null;
 
     [Header("Target Settings")]
     [SerializeField] private Renderer _targetRenderer = null;
     [SerializeField] private float _currentHealth = 1f;
     [SerializeField, ColorUsageAttribute(true, true)] private Color[] _targetColorProgression = new Color[3];
+    [SerializeField] private float _movementSpeed = 5f;
 	#endregion
 
     #region Standard Attributes
@@ -122,6 +123,8 @@ public class TargetController : MonoBehaviour
         if(_currentHealth <= 0) {
             //Kill target.
             ExplodeTarget();
+        } else {
+            _targetAnimator.SetTrigger("TargetHit");
         }
     }
 
