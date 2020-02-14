@@ -142,7 +142,13 @@ public class TargetSpawnManager : MonoBehaviour
         }
     }
 
-    Vector3 GetRandomPointInCollider(Collider collider) {
+    /// <summary>
+    /// Function that returns a random point inside a collider bounds.
+    /// If the point is not inside the collider (Bounds are a box when the collider might actually be a sphere): Look for another point for up to ten times.
+    /// </summary>
+    /// <param name="collider">Spawn area collider.</param>
+    /// <returns>Random point inside those bounds.</returns>
+    private Vector3 GetRandomPointInCollider(Collider collider) {
         ++_pointSearchCounter;
 
         Vector3 point = new Vector3(

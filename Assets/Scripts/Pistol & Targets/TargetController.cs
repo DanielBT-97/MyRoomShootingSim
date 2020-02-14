@@ -18,27 +18,32 @@ public class TargetController : MonoBehaviour
 
     #region Serialized Fields
     [Header("Target References")]
-    [SerializeField] private ParticleSystem _destroyTargetEffect = null;
-    [SerializeField] private TargetSpawnManager _targetSpawnManager = null;
-    [SerializeField] private Animator _targetAnimator = null;
-    [SerializeField] private GameObject[] _pointsObj;
+    [SerializeField] private ParticleSystem _destroyTargetEffect = null;    //Particle System for the destruction effect.
+    [SerializeField] private TargetSpawnManager _targetSpawnManager = null; //Target Spawn Manager.
+    [SerializeField] private Animator _targetAnimator = null;               //Animator reference for the target. (Hit animation)
+    [SerializeField] private GameObject[] _pointsObj;                       //Point gameobject --> 0: 100 | 1: 200 | 2: 500
 
     [Header("Target Settings")]
-    [SerializeField] private Renderer _targetRenderer = null;
-    [SerializeField] private float _currentHealth = 1f;
-    [SerializeField, ColorUsageAttribute(true, true)] private Color[] _targetColorProgression = new Color[3];
-    [SerializeField] private float _movementSpeed = 5f;
+    [SerializeField] private Renderer _targetRenderer = null;       //Target renderer. Used for material properties blocks. (also as the reference to the target gameobject)
+    [SerializeField, ColorUsageAttribute(true, true)] private Color[] _targetColorProgression = new Color[3];   //Color array for the target's different colors for each current health.
+    [SerializeField] private float _movementSpeed = 5f;             //Target's movement speed.
 	#endregion
 
     #region Standard Attributes
-    private MaterialPropertyBlock _matPropBlock = null;
-    private Color _currentColor = Color.black;
-    private TargetSpawnManager.TargetReferences _targetReference = default;
-    private bool _targetIsAlive = false;
-    private float _initialHealth = 0f;
+    //Color
+    private MaterialPropertyBlock _matPropBlock = null;     //Property block variable.
+    private Color _currentColor = Color.black;              //Current color of the target.
+    
+    //Other
+    private TargetSpawnManager.TargetReferences _targetReference = default;     //Target reference variable. Used to identify each target when communicating with the Object Pooling system.
+    private bool _targetIsAlive = false;                    //Flag marking the target as alive. Used for position and color update.
+    
+    //Health
+    private float _currentHealth = 1f;                      //Current health of the target.
+    private float _initialHealth = 0f;                      //Initial health of the target.
 
     //Movement
-    private Vector3 _movementDirection = Vector3.zero;
+    private Vector3 _movementDirection = Vector3.zero;      //Movement direction of the target. Set when spawning.
 	#endregion
 
     #region Consultors and Modifiers
@@ -84,17 +89,31 @@ public class TargetController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Method used to set the target's reference when first created.
+    /// This reference is used later for moving the target between the object pooling lists.
+    /// </summary>
+    /// <param name="targetRef"></param>
     public void SetTargetReference(TargetSpawnManager.TargetReferences targetRef) {
         _targetReference = targetRef;
     }
 
+    /// <summary>
+    /// Method to be called once the target has been spawned in order to tell it to enable itself.
+    /// </summary>
     public void TargetSpawned() {
         _targetRenderer.gameObject.SetActive(true);
         _targetIsAlive = true;
     }
 
+    /// <summary>
+    /// Method used when a target has been spawned.
+    /// Orientates the target and sets the movement direction.
+    /// </summary>
+    /// <param name="direction">Global Movement direction</param>
+    /// <param name="forwardOrientation">Looking direction</param>
     public void OrientateAndLaunchTarget(Vector3 direction, Vector3 forwardOrientation) {
-        this.gameObject.transform.right = forwardOrientation;
+        this.gameObject.transform.right = forwardOrientation;   //Since the target is rotated instead of forward I use right as the front.
         _movementDirection = direction;
     }
 	#endregion
@@ -180,6 +199,12 @@ public class TargetController : MonoBehaviour
         _targetSpawnManager.TargetDestroyed(_targetReference);
     }
 
+    /// <summary>
+    /// Used to be able to use health as an index for the PointsObject and TargetColor selection arrays.
+    /// Function that returns the rounded up int of the float health of the target.
+    /// </summary>
+    /// <param name="health">Health to be used as index.</param>
+    /// <returns>CeilToInt rounding.</returns>
     private int RoundUpHealthToInt(float health) {
         return Mathf.CeilToInt(_initialHealth);
     }

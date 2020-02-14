@@ -28,7 +28,7 @@ public class TargetCollision : MonoBehaviour
 
     #region API Methods
     /// <summary>
-    /// Call TargetController Hit method.
+    /// Call TargetController Hit method. Called by the bullet hiting the target.
     /// </summary>
     /// <param name="bulletDamage"></param>
     public void Hit(float bulletDamage) {
@@ -40,6 +40,7 @@ public class TargetCollision : MonoBehaviour
 	#endregion
 
     #region Unity Callback
+    //Call Instakill target when hitting a despawn area.
     private void OnTriggerEnter(Collider other) {
         if(other.gameObject.tag == "DeathArea") {
             _targetController.InstaKillTarget();
