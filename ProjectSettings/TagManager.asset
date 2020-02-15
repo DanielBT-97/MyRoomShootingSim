@@ -21,7 +21,7 @@ TagManager:
   - SpawnAreas
   - DespawnAreas
   - MinimapTag
-  - 
+  - PostProcessMinimap
   - 
   - 
   - 
