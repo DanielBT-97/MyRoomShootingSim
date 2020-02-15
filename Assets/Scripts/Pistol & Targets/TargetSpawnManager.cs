@@ -42,7 +42,11 @@ public class TargetSpawnManager : MonoBehaviour
     private List<TargetReferences> _availableTargets;   //List of available targets to be used by the spawner.
     private List<TargetReferences> _onUseTargets;       //List of the targets already spawned.
 
-    int _pointSearchCounter = 0;
+    private int _pointSearchCounter = 0;
+    private float _previousTime = 0f;
+    private float _spawnRate = 0f;
+    private float _minimumSpawnRate = 0.75f;
+    private float _maximumSpawnRate = 2f;
 	#endregion
 
     #region Consultors and Modifiers
@@ -68,8 +72,13 @@ public class TargetSpawnManager : MonoBehaviour
     private void Awake() {
         _availableTargets = new List<TargetReferences>();
         _onUseTargets = new List<TargetReferences>();
-
+        
         InstantiateObjectPool();
+    }
+
+    private void Start() {
+        _spawnRate = UnityEngine.Random.Range(_minimumSpawnRate, _maximumSpawnRate);
+        _previousTime = Time.time;
     }
 
     /// <summary>
@@ -87,6 +96,13 @@ public class TargetSpawnManager : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.F3)) {
             SpawnTarget3();
+        }
+
+        if(_previousTime + (_spawnRate/Mathf.Clamp(Time.time/10, 1, 100)) <= Time.time) {
+            _previousTime = Time.time;
+            int randomHealth = UnityEngine.Random.Range(1, 4);
+            SpawnTarget(randomHealth);
+            _spawnRate = UnityEngine.Random.Range(_minimumSpawnRate, _maximumSpawnRate);
         }
     }
 	#endregion
