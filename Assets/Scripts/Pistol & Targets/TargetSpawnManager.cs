@@ -84,21 +84,8 @@ public class TargetSpawnManager : MonoBehaviour
     /// <summary>
     /// Update is called every frame, if the MonoBehaviour is enabled.
     /// </summary>
-    void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.F1)) {
-            SpawnTarget1();
-        }
-
-        if(Input.GetKeyDown(KeyCode.F2)) {
-            SpawnTarget2();
-        }
-
-        if(Input.GetKeyDown(KeyCode.F3)) {
-            SpawnTarget3();
-        }
-
-        if(_previousTime + (_spawnRate/Mathf.Clamp(Time.time/10, 1, 100)) <= Time.time) {
+    void Update() {
+        if( (_previousTime + GetSpawnRate(_spawnRate)) <= Time.time) {
             _previousTime = Time.time;
             int randomHealth = UnityEngine.Random.Range(1, 4);
             SpawnTarget(randomHealth);
@@ -112,6 +99,19 @@ public class TargetSpawnManager : MonoBehaviour
 
     #region Other methods
     /// <summary>
+    /// Function that processes the spawn rate and decreases it over time.
+    /// Visual representation: https://cdn.discordapp.com/attachments/232469764109369344/678270702230437895/unknown.png (Geogebra screenshot --> x is time, y is processed spawnrate)
+    /// </summary>
+    /// <param name="baseSpawnRate"></param>
+    /// <returns></returns>
+    private float GetSpawnRate(float baseSpawnRate) {
+        float processedSpawnRate = baseSpawnRate / ((Time.time * 0.5f) + 1);
+        processedSpawnRate = Mathf.Pow(processedSpawnRate, 0.4f);
+
+        return processedSpawnRate;
+    }
+
+    /// <summary>
     /// Fills up the list of available Targets to be used when needed to be spawned.
     /// Sends a copy of the reference correspondent to each target to itself so that it can be used when destruction is needed.
     /// </summary>
@@ -124,18 +124,6 @@ public class TargetSpawnManager : MonoBehaviour
             tempTargetRef.targetController.SetTargetReference(tempTargetRef);
             _availableTargets.Add(tempTargetRef);
         }
-    }
-
-    private void SpawnTarget1() {
-        SpawnTarget(1);
-    }
-
-    private void SpawnTarget2() {
-        SpawnTarget(2);
-    }
-
-    private void SpawnTarget3() {
-        SpawnTarget(3);
     }
 
     /// <summary>
@@ -181,53 +169,6 @@ public class TargetSpawnManager : MonoBehaviour
         }
  
         return point;
-    }
-    
-    [ContextMenu("Spawn Chain of Targets")]
-    private void TargetSpawnChain() {
-        StartCoroutine(TimedRandomTargetSpawn());
-    }
-
-    private IEnumerator TimedRandomTargetSpawn() {
-        int targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
-        targetHealth = UnityEngine.Random.Range(1, 4);
-        SpawnTarget(targetHealth);
-        yield return new WaitForSeconds(0.5f);
     }
 	#endregion
 
