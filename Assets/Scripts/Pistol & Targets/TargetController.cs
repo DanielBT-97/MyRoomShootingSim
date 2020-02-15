@@ -32,14 +32,14 @@ public class TargetController : MonoBehaviour
     #region Standard Attributes
     //Color
     private MaterialPropertyBlock _matPropBlock = null;     //Property block variable.
-    private Color _currentColor = Color.black;              //Current color of the target.
+    public Color _currentColor = Color.black;              //Current color of the target.
     
     //Other
     private TargetSpawnManager.TargetReferences _targetReference = default;     //Target reference variable. Used to identify each target when communicating with the Object Pooling system.
     private bool _targetIsAlive = false;                    //Flag marking the target as alive. Used for position and color update.
     
     //Health
-    private float _currentHealth = 1f;                      //Current health of the target.
+    public float _currentHealth = 1f;                      //Current health of the target.
     private float _initialHealth = 0f;                      //Initial health of the target.
 
     //Movement
@@ -123,7 +123,6 @@ public class TargetController : MonoBehaviour
     /// Creates materialPropBlock once.
     /// </summary>
     private void Awake() {
-        Debug.Log("AWAKE");
         if(_matPropBlock == null) _matPropBlock = new MaterialPropertyBlock();
         //_targetIsAlive = true;
         //_targetRenderer.gameObject.SetActive(true);
@@ -138,7 +137,7 @@ public class TargetController : MonoBehaviour
             if(_currentHealth <= 0) {   //If current health is lower than 0 (Should get destroyed) use same color as 1 hit.
                 UpdateTargetColor(_targetColorProgression[0]);
             } else {    //Else use the color corresponding to the rounded UP int value of current health (In case I decide to use a float dmg value at some point).
-                UpdateTargetColor(_targetColorProgression[RoundUpHealthToInt(_initialHealth) - 1]);    //FloorToInt could be used, would change the behaviour so testing needed.
+                UpdateTargetColor(_targetColorProgression[RoundUpHealthToInt(_currentHealth) - 1]);    //FloorToInt could be used, would change the behaviour so testing needed.
             }
 
             _targetRenderer.transform.position += _movementDirection * _movementSpeed * Time.deltaTime;
@@ -206,7 +205,7 @@ public class TargetController : MonoBehaviour
     /// <param name="health">Health to be used as index.</param>
     /// <returns>CeilToInt rounding.</returns>
     private int RoundUpHealthToInt(float health) {
-        return Mathf.CeilToInt(_initialHealth);
+        return Mathf.CeilToInt(health);
     }
 
     #region HealthTesting_ContextMenu

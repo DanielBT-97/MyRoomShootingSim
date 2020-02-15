@@ -129,14 +129,15 @@ public class TargetSpawnManager : MonoBehaviour
     /// </summary>
     private void SpawnTarget(int targetHealth = 1) {
         _pointSearchCounter = 0;
-        Vector3 tempSpawnPos = GetRandomPointInCollider(_targetSpawnAreas[0].areaCollider);
+        int randomSpawnArea = UnityEngine.Random.Range(0, _targetSpawnAreas.Length);
+        Vector3 tempSpawnPos = GetRandomPointInCollider(_targetSpawnAreas[randomSpawnArea].areaCollider);
         if(_availableTargets.Count > 0) {
             TargetReferences tempTargetRef = _availableTargets[_availableTargets.Count - 1];
             tempTargetRef.mainObj.transform.position = tempSpawnPos;
             tempTargetRef.targetController.ResetTarget(targetHealth);
             tempTargetRef.targetController.TargetSpawned();
             tempTargetRef.mainObj.SetActive(true);
-            tempTargetRef.targetController.OrientateAndLaunchTarget(_targetSpawnAreas[0].launchDirection, _targetSpawnAreas[0].forwardOrientation);
+            tempTargetRef.targetController.OrientateAndLaunchTarget(_targetSpawnAreas[randomSpawnArea].launchDirection, _targetSpawnAreas[randomSpawnArea].forwardOrientation);
             _onUseTargets.Add(tempTargetRef);
             _availableTargets.RemoveAt(_availableTargets.Count - 1);
         }
