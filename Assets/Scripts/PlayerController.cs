@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class PlayerController : MonoBehaviour
     [Header("Camera Settings")]
     [SerializeField] private float _playerHeight = 1.67f;
     [SerializeField] private float _horizontalTurnSpeed = 2.0f;
-    [SerializeField] private float _VerticalTurnSpeed = 2.0f;
+    [FormerlySerializedAs("_VerticalTurnSpeed")] [SerializeField] private float _verticalTurnSpeed = 2.0f;
 	#endregion
 
     #region Standard Attributes
@@ -68,7 +69,7 @@ public class PlayerController : MonoBehaviour
 
     private void CameraRotation() {
         _yaw += _horizontalTurnSpeed * Input.GetAxis("Mouse X");
-        _pitch -= _VerticalTurnSpeed * Input.GetAxis("Mouse Y");
+        _pitch -= _verticalTurnSpeed * Input.GetAxis("Mouse Y");
 
         _cameraTrans.eulerAngles = new Vector3(_pitch, _yaw, 0.0f);
     }
